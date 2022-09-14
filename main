@@ -1,0 +1,60 @@
+#include <Adafruit_GPS.h>
+#include <SoftwareSerial.h>
+
+SoftwareSerial mySerial(transmitting pin [TX], receiving pin[RX]);
+Adafruit_GPS GPS(&mySerial);
+
+#define GPSECHO  true
+
+void setup()
+{
+
+  Serial.begin(115200);
+  delay(5000);
+  Serial.println("Adafruit GPS library basic parsing test!");
+
+  GPS.begin(9600);
+  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);   
+  GPS.sendCommand(PGCMD_ANTENNA);
+  delay(1000);
+  mySerial.println(PMTK_Q_RELEASE);
+}
+
+uint32_t timer = millis();
+void loop()                     // run over and over again
+{
+  char c = GPS.read();
+  if ((c) && (GPSECHO))
+    Serial.write(c);
+  if (GPS.newNMEAreceived()) {
+    if (!GPS.parse(GPS.lastNMEA()))   
+      return;  
+  }
+
+  if (millis() - timer > 2000) {
+    timer = millis(); // reset the timer
+    Serial.print("Fix: "); Serial.print((int)GPS.fix);
+    Serial.print(" quality: "); Serial.println((int)GPS.fixquality);
+    
+      double first = GPS.latitude; 
+      double second = first/100.0;
+      int third = second; // 40
+
+      double fourth = first - (third * 100);
+      double fifth = fourth / 60.0;
+      double lat = third + fifth;
+      Serial.print("Converted Latitude: "); Serial.println(lat, 16);
+
+      double firsty = GPS.longitude; 
+      double secondy = firsty/100.0;
+      int thirdy = secondy; // 40
+
+      double fourthy = firsty - (thirdy * 100);
+      double fifthy = fourthy / 60.0;
+      double lon = (thirdy + fifthy) * -1;
+      Serial.print("Converted Latitude: "); Serial.println(lon, 16);
+
+     
+  }
+}
