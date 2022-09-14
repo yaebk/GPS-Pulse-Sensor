@@ -50,5 +50,5 @@ void handleMessage(AdafruitIO_Data *data) {
   double received_lon = data->lon();
   double received_ele = data->ele();
   
-
+  
 }
